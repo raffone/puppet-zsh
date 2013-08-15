@@ -12,8 +12,10 @@ define zsh::install($path = '/usr/bin/zsh') {
     require => Package['zsh']
   }
 
-  package { 'zsh':
-    ensure => latest,
+  if(!defined(Package['zsh'])) {
+    package { 'zsh':
+      ensure => latest,
+    }
   }
 
   if(!defined(Package['curl'])) {
@@ -22,16 +24,16 @@ define zsh::install($path = '/usr/bin/zsh') {
     }
   }
 
-  exec { 'copy-zshrc':
+  exec { "copy_zshrc_for_$name":
     path    => '/bin:/usr/bin',
     cwd     => "/home/$name",
     user    => $name,
     command => 'cp .oh-my-zsh/templates/zshrc.zsh-template .zshrc',
     unless  => 'ls .zshrc',
-    require => Exec['clone_oh_my_zsh'],
+    require => Exec["clone_oh_my_zsh_for_$name"],
   }
 
-  exec { 'clone_oh_my_zsh':
+  exec { "clone_oh_my_zsh_for_$name":
     path    => '/bin:/usr/bin',
     cwd     => "/home/$name",
     user    => $name,
